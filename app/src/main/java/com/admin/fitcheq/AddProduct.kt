@@ -1,11 +1,17 @@
 package com.admin.fitcheq
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.admin.fitcheq.data.OutfitData
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AddProduct : AppCompatActivity() {
     private lateinit var eturl: EditText
@@ -16,6 +22,7 @@ class AddProduct : AppCompatActivity() {
     private lateinit var etproductId: EditText
     private lateinit var ettags: EditText
     private lateinit var etwebsite: EditText
+    private lateinit var submitButton: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,6 +32,7 @@ class AddProduct : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val firestore = FirebaseFirestore.getInstance()
         eturl = findViewById(R.id.etUrl)
         etimageUrl = findViewById(R.id.etImageUrl)
         ettags = findViewById(R.id.etTags)
@@ -33,17 +41,39 @@ class AddProduct : AppCompatActivity() {
         etgender = findViewById(R.id.etGender)
         etproductId = findViewById(R.id.etProductId)
         etwebsite = findViewById(R.id.etWebsite)
-
-        val url = eturl.text.toString()
-        val imageUrl = eturl.text.toString()
-        val tags = eturl.text.toString()
-        val title = eturl.text.toString()
-        val price = eturl.text.toString()
-        val gender = eturl.text.toString()
-        val productId = eturl.text.toString()
-        val website = eturl.text.toString()
+        submitButton = findViewById(R.id.btnSubmit)
 
 
+
+        submitButton.setOnClickListener {
+            val tagsString = ettags.text.toString()
+            // Split by comma, trim spaces, and filter out any empty values
+            val tagList: List<String> = tagsString.split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            val outfits = OutfitData(
+                id = etproductId.text.toString(),
+             link = eturl.text.toString(),
+             imageUrl = etimageUrl.text.toString(),
+             title = ettitle.text.toString(),
+             price = etprice.text.toString(),
+             website = etwebsite.text.toString(),
+             gender = etgender.text.toString(),
+             tags = tagList,
+            isFavorite = false
+            )
+            firestore.collection("outfits").add(outfits)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Outfit Added", Toast.LENGTH_SHORT).show()
+                    //navigate to dashboard
+                    val intent = Intent(this, DashBoardActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to Add: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
 
     }
 }
