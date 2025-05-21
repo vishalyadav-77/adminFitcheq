@@ -3,6 +3,8 @@ package com.admin.fitcheq
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.FrameLayout
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -12,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth
 
 class DashBoardActivity : AppCompatActivity() {
     private lateinit var addproduct: CardView
+    private lateinit var editproduct: CardView
+    private lateinit var fragmentContainer: FrameLayout
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +29,8 @@ class DashBoardActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         addproduct = findViewById(R.id.addproduct)
+        editproduct = findViewById(R.id.editproduct)
+        fragmentContainer = findViewById(R.id.fragment_container)
 
         // Check if user is not logged in
         if (auth.currentUser == null) {
@@ -34,6 +40,13 @@ class DashBoardActivity : AppCompatActivity() {
         }
         addproduct.setOnClickListener {
             startActivity(Intent(this, AddProduct::class.java))
+        }
+        editproduct.setOnClickListener{
+            fragmentContainer.visibility = View.VISIBLE
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, Edit_outfitFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 }
