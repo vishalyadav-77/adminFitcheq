@@ -59,8 +59,7 @@ class AddProduct : AppCompatActivity() {
              price = etprice.text.toString(),
              website = etwebsite.text.toString(),
              gender = etgender.text.toString(),
-             tags = tagList,
-            isFavorite = false
+             tags = tagList
             )
             firestore.collection("outfits").add(outfits)
                 .addOnSuccessListener {
