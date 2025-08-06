@@ -51,6 +51,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation ("com.google.firebase:firebase-auth-ktx:22.1.2")
     implementation ("com.google.firebase:firebase-firestore:24.10.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("androidx.fragment:fragment-ktx:1.7.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+
 
 }
 apply (plugin = "com.google.gms.google-services")
