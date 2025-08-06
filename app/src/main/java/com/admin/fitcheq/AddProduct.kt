@@ -3,6 +3,8 @@ package com.admin.fitcheq
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -15,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class AddProduct : AppCompatActivity() {
     private lateinit var eturl: EditText
+    private lateinit var etimageUrls: EditText
     private lateinit var ettitle: EditText
     private lateinit var etprice: EditText
     private lateinit var etimageUrl: EditText
@@ -33,6 +36,7 @@ class AddProduct : AppCompatActivity() {
             insets
         }
         val firestore = FirebaseFirestore.getInstance()
+        etimageUrls = findViewById(R.id.etImageUrls)
         eturl = findViewById(R.id.etUrl)
         etimageUrl = findViewById(R.id.etImageUrl)
         ettags = findViewById(R.id.etTags)
@@ -43,23 +47,62 @@ class AddProduct : AppCompatActivity() {
         etwebsite = findViewById(R.id.etWebsite)
         submitButton = findViewById(R.id.btnSubmit)
 
+        etimageUrls.addTextChangedListener(object : TextWatcher {
+            var lastFormatted = ""
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                etimageUrls.removeTextChangedListener(this)
+
+                val currentText = s.toString()
+
+                // Detect if the user just pressed enter
+                if (currentText.endsWith("\n")) {
+                    val cleanedUrls = currentText
+                        .split("\n", ",")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .distinct()
+
+                    val lastUrl = cleanedUrls.lastOrNull() ?: ""
+                    val newText = cleanedUrls.dropLast(1).joinToString(",\n") +
+                            (if (cleanedUrls.size > 1) ",\n" else "") + lastUrl + ",\n"
+
+                    lastFormatted = newText
+                    etimageUrls.setText(newText)
+                    etimageUrls.setSelection(newText.length)
+                }
+
+                etimageUrls.addTextChangedListener(this)
+            }
+        })
+
+
 
 
         submitButton.setOnClickListener {
+            val imageUrlsList = etimageUrls.text.toString()
+                .split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
             val tagsString = ettags.text.toString()
-            // Split by comma, trim spaces, and filter out any empty values
             val tagList: List<String> = tagsString.split(",")
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
             val outfits = OutfitData(
                 id = etproductId.text.toString(),
-             link = eturl.text.toString(),
-             imageUrl = etimageUrl.text.toString(),
-             title = ettitle.text.toString(),
-             price = etprice.text.toString(),
-             website = etwebsite.text.toString(),
-             gender = etgender.text.toString(),
-             tags = tagList
+                link = eturl.text.toString(),
+                imageUrl = etimageUrl.text.toString(),
+                imageUrls = imageUrlsList,
+                title = ettitle.text.toString(),
+                price = etprice.text.toString(),
+                website = etwebsite.text.toString(),
+                gender = etgender.text.toString(),
+                tags = tagList
             )
             firestore.collection("outfits").add(outfits)
                 .addOnSuccessListener {

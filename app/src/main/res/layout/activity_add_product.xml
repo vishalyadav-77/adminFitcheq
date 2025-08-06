@@ -24,6 +24,24 @@
             android:layout_gravity="center"
             android:layout_marginBottom="15dp"/>
 
+        <!-- Image URLs -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Image URLs"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etImageUrls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="textMultiLine|textUri"
+            android:minLines="5"
+            android:maxLines="10"
+            android:gravity="top"
+            android:layout_marginBottom="12dp" />
+
         <!-- URL -->
         <TextView
             android:layout_width="match_parent"
