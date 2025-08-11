@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.FrameLayout
 import android.view.View
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 class DashBoardActivity : AppCompatActivity() {
     private lateinit var addproduct: CardView
     private lateinit var editproduct: CardView
+    private lateinit var productsBtn: Button
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +32,7 @@ class DashBoardActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         addproduct = findViewById(R.id.addproduct)
         editproduct = findViewById(R.id.editproduct)
+        productsBtn = findViewById(R.id.productsBtn)
         fragmentContainer = findViewById(R.id.fragment_container)
 
         // Check if user is not logged in
@@ -47,6 +50,9 @@ class DashBoardActivity : AppCompatActivity() {
                 .replace(R.id.fragment_container, Edit_outfitFragment())
                 .addToBackStack(null)
                 .commit()
+        }
+        productsBtn.setOnClickListener {
+            startActivity(Intent(this, ProductsScreen::class.java))
         }
     }
 }
