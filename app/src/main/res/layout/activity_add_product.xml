@@ -162,6 +162,127 @@
             android:inputType="textUri"
             android:layout_marginBottom="20dp"/>
 
+        <!-- Category -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category (ex- tshirt, jeans)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Type -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Type (ex- polo, fullsleeves)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Color -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Color"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Style (comma separated list) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Style [old money] (comma separated)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Occasion (comma separated list) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Occasion [office, college] (comma separated)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etOccasion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Season (optional, comma separated list) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Season [summer, spring] (comma separated)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etSeason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Fit (optional) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fit [slim fit or oversize] (optional)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etFit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Material (optional) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Material (optional)"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"/>
+        <EditText
+            android:id="@+id/etMaterial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background"
+            android:inputType="text"
+            android:layout_marginBottom="12dp"/>
+
+
         <!-- Submit Button -->
         <Button
             android:id="@+id/btnSubmit"
