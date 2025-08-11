@@ -15,6 +15,9 @@
         android:theme="@style/Theme.FitcheqAdmin"
         tools:targetApi="31">
         <activity
+            android:name=".ProductsScreen"
+            android:exported="false" />
+        <activity
             android:name=".AddProduct"
             android:exported="false" />
         <activity
