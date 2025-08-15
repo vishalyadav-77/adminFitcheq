@@ -12,12 +12,12 @@ data class OutfitData(
     val tags: List<String> = emptyList(),
     var isFavorite: Boolean = false,
 
-    val category: String = "",            // e.g. "tshirt"
-    val type: String = "",                // e.g. "polo"
-    val color: String = "",               // e.g. "beige"
-    val style: List<String> = emptyList(),         // e.g. ["oldmoney", "minimalist"]
-    val occasion: List<String> = emptyList(),      // e.g. ["college", "office", "date"]
-    val season: List<String> = emptyList(),       // e.g. ["summer", "spring"]
-    val fit: String = "",                // e.g. "oversized", "slim"
-    val material: String = "",           //linen
+    val category: String = "",
+    val type: String = "",
+    val color: String = "",
+    val style: List<String> = emptyList(),
+    val occasion: List<String> = emptyList(),
+    val season: List<String> = emptyList(),
+    val fit: String = "",
+    val material: String = "",
 )
