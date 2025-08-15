@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="12dp">
+
+    <ImageView android:id="@+id/imageView"
+        android:layout_gravity="center"
+        android:layout_width="260dp" android:layout_height="290dp"
+        android:scaleType="centerCrop" />
+
+    <TextView android:id="@+id/titleTextView"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Title" android:textStyle="bold" android:maxLines="1" />
+
+    <TextView android:id="@+id/priceTextView"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="₹999" />
+
+    <TextView android:id="@+id/genderTextView"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Gender: Male" android:textSize="12sp" />
+
+    <TextView android:id="@+id/tagTextView"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Tag: starboy" android:textSize="12sp" />
+    <TextView
+        android:id="@+id/tvImageUrlsWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Image URLs Not Present"
+        android:textColor="@android:color/holo_green_light"
+        android:visibility="gone"
+        android:textSize="12sp"
+        android:paddingTop="4dp"/>
+    <TextView
+        android:id="@+id/tvCategoryWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Category Field Not Present"
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone"
+        android:textSize="12sp"
+        android:paddingTop="4dp"/>
+
+
+    <Button android:id="@+id/editButton"
+        android:layout_width="130dp" android:layout_height="wrap_content"
+        android:text="Edit" android:backgroundTint="@color/black" android:layout_gravity="center" />
+
+</LinearLayout>
