@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 class DashBoardActivity : AppCompatActivity() {
     private lateinit var addproduct: CardView
     private lateinit var editproduct: CardView
+    private lateinit var cleanUp: CardView
     private lateinit var productsBtn: Button
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var auth: FirebaseAuth
@@ -32,6 +33,7 @@ class DashBoardActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         addproduct = findViewById(R.id.addproduct)
         editproduct = findViewById(R.id.editproduct)
+        cleanUp= findViewById(R.id.cleanupButton)
         productsBtn = findViewById(R.id.productsBtn)
         fragmentContainer = findViewById(R.id.fragment_container)
 
@@ -53,6 +55,9 @@ class DashBoardActivity : AppCompatActivity() {
         }
         productsBtn.setOnClickListener {
             startActivity(Intent(this, ProductsScreen::class.java))
+        }
+        cleanUp.setOnClickListener {
+            startActivity(Intent(this, CleanupActivity::class.java))
         }
     }
 }
