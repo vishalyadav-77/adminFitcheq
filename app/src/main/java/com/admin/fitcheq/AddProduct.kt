@@ -106,35 +106,35 @@ class AddProduct : AppCompatActivity() {
 
             val tagsString = ettags.text.toString()
             val tagList: List<String> = tagsString.split(",")
-                .map { it.trim() }
+                .map { it.trim().lowercase().replace(" ", "") }
                 .filter { it.isNotEmpty() }
 
             val styleList = etStyle.text.toString().split(",")
-                .map { it.trim() }
+                .map { it.trim().lowercase().replace(" ", "") }
                 .filter { it.isNotEmpty() }
             val occasionList = etOccasion.text.toString().split(",")
-                .map { it.trim() }
+                .map { it.trim().lowercase().replace(" ", "") }
                 .filter { it.isNotEmpty() }
-            val seasonList = etSeason.text.toString().split(",").map { it.trim() }
+            val seasonList = etSeason.text.toString().split(",").map { it.trim().lowercase().replace(" ", "") }
                 .filter { it.isNotEmpty() }
             val outfits = OutfitData(
-                id = etproductId.text.toString(),
-                link = eturl.text.toString(),
+                id = etproductId.text.toString().trim().lowercase().replace(" ", ""),
+                link = eturl.text.toString().trim(),
                 imageUrl = etimageUrl.text.toString(),
                 imageUrls = imageUrlsList,
-                title = ettitle.text.toString(),
-                price = etprice.text.toString(),
-                website = etwebsite.text.toString(),
-                gender = etgender.text.toString(),
+                title = ettitle.text.toString().trim(),
+                price = etprice.text.toString().trim().replace(" ", ""),
+                website = etwebsite.text.toString().trim().uppercase(),
+                gender = etgender.text.toString().trim().lowercase().replace(" ", ""),
                 tags = tagList,
-                category = etCategory.text.toString(),
-                type = etType.text.toString(),
-                color = etColor.text.toString(),
+                category = etCategory.text.toString().trim().lowercase().replace(" ", ""),
+                type = etType.text.toString().trim().lowercase().replace(" ", ""),
+                color = etColor.text.toString().trim().lowercase(),
                 style = styleList,
                 occasion = occasionList,
                 season = seasonList,
-                fit = etFit.text.toString(),
-                material = etMaterial.text.toString()
+                fit = etFit.text.toString().trim().lowercase().replace(" ", ""),
+                material = etMaterial.text.toString().trim().lowercase().replace(" ", "")
             )
             firestore.collection("outfits").add(outfits)
                 .addOnSuccessListener {

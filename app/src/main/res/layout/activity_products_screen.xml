@@ -27,7 +27,7 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingHorizontal="20dp">
+        android:paddingHorizontal="30dp">
 
         <!-- Get Products Data -->
         <androidx.cardview.widget.CardView
@@ -98,6 +98,7 @@
             android:clickable="true"
             android:focusable="true"
             app:cardElevation="2dp"
+            android:layout_marginBottom="16dp"
             app:cardCornerRadius="12dp">
 
             <TextView
@@ -105,6 +106,25 @@
                 android:layout_height="wrap_content"
                 android:padding="20dp"
                 android:text="Find Products By Category"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
+        <!-- Find Product by category -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/brandList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:text="Brand Data"
                 android:textSize="18sp"
                 android:gravity="center"
                 android:textStyle="bold" />
