@@ -15,6 +15,7 @@ class ProductsScreen : AppCompatActivity() {
     private lateinit var allproductsBtn: CardView
     private lateinit var femaleproductsBtn: CardView
     private lateinit var maleproductsBtn: CardView
+    private lateinit var brandDataBtn: CardView
     private lateinit var productFragmentContainer: FrameLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,7 @@ class ProductsScreen : AppCompatActivity() {
         allproductsBtn = findViewById(R.id.allproducts)
         maleproductsBtn = findViewById(R.id.maleproducts)
         femaleproductsBtn = findViewById(R.id.femaleproducts)
+        brandDataBtn = findViewById(R.id.brandList)
         productFragmentContainer = findViewById(R.id.product_fragment_container)
 
         allproductsBtn.setOnClickListener {
@@ -39,6 +41,15 @@ class ProductsScreen : AppCompatActivity() {
         }
         femaleproductsBtn.setOnClickListener {
             openProductListFragment("female", null)
+
+        }
+        brandDataBtn.setOnClickListener {
+            val fragment = BrandStats_Fragment()
+            productFragmentContainer.visibility = View.VISIBLE
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.product_fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
 
         }
     }
