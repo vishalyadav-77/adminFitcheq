@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.admin.fitcheq.data.OutfitData
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class AddProduct : AppCompatActivity() {
     private lateinit var eturl: EditText
@@ -34,6 +35,8 @@ class AddProduct : AppCompatActivity() {
     private lateinit var etFit: EditText
     private lateinit var etMaterial: EditText
     private lateinit var submitButton: Button
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -136,10 +139,13 @@ class AddProduct : AppCompatActivity() {
                 fit = etFit.text.toString().trim().lowercase(),
                 material = etMaterial.text.toString().trim().lowercase().replace(" ", "")
             )
+            // 1. Add new product
             firestore.collection("outfits").add(outfits)
                 .addOnSuccessListener {
                     Toast.makeText(this, "Outfit Added", Toast.LENGTH_SHORT).show()
-                    //navigate to dashboard
+                    // 2. Update filters collection
+                    updateFilters(firestore, outfits)
+                    // 3. Navigate to dashboard
                     val intent = Intent(this, DashBoardActivity::class.java)
                     startActivity(intent)
                     finish()
@@ -149,5 +155,51 @@ class AddProduct : AppCompatActivity() {
                 }
         }
 
+    }
+}
+private fun updateFilters(firestore: FirebaseFirestore, outfit: OutfitData) {
+    val filtersDoc = firestore.collection("filters").document("master")
+
+    firestore.runTransaction { transaction ->
+        val snapshot = transaction.get(filtersDoc)
+        val current = snapshot.data ?: emptyMap<String, Any>()
+
+        val updated = mutableMapOf<String, Any>()
+        updated.putAll(current)
+
+        // Append unique values for each filter field
+        fun updateList(key: String, value: String?) {
+            if (!value.isNullOrEmpty()) {
+                val existing = (current[key] as? List<*>)?.map { it.toString() } ?: emptyList()
+                if (!existing.contains(value)) {
+                    updated[key] = existing + value
+                }
+            }
+        }
+
+        // Handle list-based fields
+        fun updateListValues(key: String, values: List<String>) {
+            if (values.isNotEmpty()) {
+                val existing = (current[key] as? List<*>)?.map { it.toString() } ?: emptyList()
+                val newValues = values.filterNot { existing.contains(it) }
+                if (newValues.isNotEmpty()) {
+                    updated[key] = existing + newValues
+                }
+            }
+        }
+
+        // Update each filter field
+        updateList("brands", outfit.website)
+        updateList("categories", outfit.category)
+        updateList("type", outfit.type)
+        updateList("fits", outfit.fit)
+        updateList("colors", outfit.color)
+        updateList("materials", outfit.material)
+//        updateListValues("tags", outfit.tags)
+//        updateListValues("styles", outfit.style)
+//        updateListValues("occasions", outfit.occasion)
+//        updateListValues("seasons", outfit.season)
+
+        transaction.set(filtersDoc, updated, SetOptions.merge())
     }
 }
