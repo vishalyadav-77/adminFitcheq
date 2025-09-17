@@ -27,12 +27,21 @@ class AdminProductViewModel: ViewModel() {
         isLastPage = false // reset
     }
 
-    fun fetchTotalProductCount(gender: String? = null, tag: String? = null) {
+    fun fetchTotalProductCount(
+        gender: String? = null,
+        tag: String? = null,
+        fieldName: String? = null,
+        fieldValue: String? = null
+    ) {
         var query: Query = FirebaseFirestore.getInstance()
             .collection("outfits")
 
         gender?.let { query = query.whereEqualTo("gender", it) }
         tag?.let { query = query.whereArrayContains("tags", it) }
+
+        if (!fieldName.isNullOrEmpty() && !fieldValue.isNullOrEmpty()) {
+            query = query.whereEqualTo(fieldName, fieldValue)
+        }
 
         query.get()
             .addOnSuccessListener { result ->
@@ -44,19 +53,28 @@ class AdminProductViewModel: ViewModel() {
             }
     }
 
-    fun fetchNextBatch(gender: String? = null, tag: String? = null) {
+
+    fun fetchNextBatch(
+        gender: String? = null,
+        tag: String? = null,
+        fieldName: String? = null,
+        fieldValue: String? = null
+    ) {
         if (isFetching || isLastPage) return
         isFetching = true
         isLoading.value = true
 
         var query: Query = FirebaseFirestore.getInstance()
             .collection("outfits")
-//            .orderBy("id") // Use indexed field like "id" or "timestamp"
 
         gender?.let { query = query.whereEqualTo("gender", it) }
         tag?.let { query = query.whereArrayContains("tags", it) }
 
-        query = query.orderBy("id")
+        if (!fieldName.isNullOrEmpty()) {
+            query = query.whereEqualTo(fieldName, fieldValue)
+        }
+
+        query = query.orderBy("id") // Make sure "id" is indexed
 
         lastVisibleDocument?.let {
             query = query.startAfter(it)
@@ -67,14 +85,12 @@ class AdminProductViewModel: ViewModel() {
             .addOnSuccessListener { result ->
                 val newOutfits = result.documents.mapNotNull { it.toObject(OutfitData::class.java) }
 
-                // If no new data, mark last page
                 if (newOutfits.isEmpty()) {
                     isLastPage = true
                 } else {
                     val currentList = products.value?.toMutableList() ?: mutableListOf()
                     currentList.addAll(newOutfits)
                     products.postValue(currentList)
-
                     lastVisibleDocument = result.documents.last()
                 }
 
@@ -87,5 +103,55 @@ class AdminProductViewModel: ViewModel() {
                 error.postValue(it.message)
             }
     }
+
+    fun fetchNextBatchDesc(
+        gender: String? = null,
+        tag: String? = null,
+        fieldName: String? = null,
+        fieldValue: String? = null
+    ) {
+        if (isFetching || isLastPage) return
+        isFetching = true
+        isLoading.value = true
+
+        var query: Query = FirebaseFirestore.getInstance()
+            .collection("outfits") // same as your other function
+            .orderBy("id", Query.Direction.DESCENDING) // descending order
+
+        gender?.let { query = query.whereEqualTo("gender", it) }
+        tag?.let { query = query.whereArrayContains("tags", it) }
+        if (!fieldName.isNullOrEmpty() && !fieldValue.isNullOrEmpty()) {
+            query = query.whereEqualTo(fieldName, fieldValue)
+        }
+
+        lastVisibleDocument?.let {
+            query = query.startAfter(it)
+        }
+
+        query.limit(10)
+            .get()
+            .addOnSuccessListener { result ->
+                val newOutfits = result.documents.mapNotNull { it.toObject(OutfitData::class.java) }
+
+                if (newOutfits.isEmpty()) {
+                    isLastPage = true
+                } else {
+                    val currentList = products.value?.toMutableList() ?: mutableListOf()
+                    currentList.addAll(newOutfits)
+                    products.postValue(currentList)
+                    lastVisibleDocument = result.documents.last()
+                }
+
+                isFetching = false
+                isLoading.postValue(false)
+            }
+            .addOnFailureListener {
+                isFetching = false
+                isLoading.postValue(false)
+                error.postValue(it.message)
+            }
+    }
+
+
 
 }
