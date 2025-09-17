@@ -125,15 +125,15 @@ class AddProduct : AppCompatActivity() {
                 title = ettitle.text.toString().trim(),
                 price = etprice.text.toString().trim().replace(" ", ""),
                 website = etwebsite.text.toString().trim().uppercase(),
-                gender = etgender.text.toString().trim().lowercase().replace(" ", ""),
+                gender = etgender.text.toString().trim().lowercase(),
                 tags = tagList,
-                category = etCategory.text.toString().trim().lowercase().replace(" ", ""),
-                type = etType.text.toString().trim().lowercase().replace(" ", ""),
+                category = etCategory.text.toString().trim().lowercase(),
+                type = etType.text.toString().trim().lowercase(),
                 color = etColor.text.toString().trim().lowercase(),
                 style = styleList,
                 occasion = occasionList,
                 season = seasonList,
-                fit = etFit.text.toString().trim().lowercase().replace(" ", ""),
+                fit = etFit.text.toString().trim().lowercase(),
                 material = etMaterial.text.toString().trim().lowercase().replace(" ", "")
             )
             firestore.collection("outfits").add(outfits)
