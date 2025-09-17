@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 class ProductListFragment : Fragment() {
     private var genderFilter: String? = null
     private var tagFilter: String? = null
+    private var fieldNameFilter: String? = null
+    private var fieldValueFilter: String? = null
     private lateinit var binding: FragmentProductListBinding
     private lateinit var adapter: ProductAdapter
     private val viewModel: AdminProductViewModel by viewModels()
@@ -27,12 +29,12 @@ class ProductListFragment : Fragment() {
         arguments?.let {
             genderFilter = it.getString("gender")
             tagFilter = it.getString("tag")
+            fieldNameFilter = it.getString("fieldName")
+            fieldValueFilter = it.getString("fieldValue")
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentProductListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -65,16 +67,23 @@ class ProductListFragment : Fragment() {
                 if (lastVisibleItemPosition >= totalItemCount - threshold &&
                     viewModel.isLoading.value == false
                 ) {
-                    viewModel.fetchNextBatch(genderFilter, tagFilter)
+                    viewModel.fetchNextBatch(
+                        genderFilter,
+                        tagFilter,
+                        fieldNameFilter,
+                        fieldValueFilter
+                    )
                 }
             }
         })
 
 
         observeViewModel()
-        viewModel.fetchTotalProductCount(genderFilter, tagFilter)
+        viewModel.fetchTotalProductCount(genderFilter, tagFilter,fieldNameFilter,
+            fieldValueFilter)
 //        viewModel.resetPagination()
-        viewModel.fetchNextBatch(genderFilter, tagFilter)
+        viewModel.fetchNextBatch(genderFilter, tagFilter,fieldNameFilter,
+            fieldValueFilter)
     }
 
     private fun observeViewModel() {
@@ -98,6 +107,7 @@ class ProductListFragment : Fragment() {
             }
         }
     }
+
     companion object {
         fun newInstance(gender: String? = null, tag: String? = null): ProductListFragment {
             val fragment = ProductListFragment()
