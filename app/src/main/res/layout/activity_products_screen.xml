@@ -11,6 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:orientation="vertical">
     <TextView
         android:layout_width="wrap_content"
@@ -92,7 +93,7 @@
 
         <!-- Find Product by category -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/findproducts"
+            android:id="@+id/findByCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
@@ -110,6 +111,29 @@
                 android:gravity="center"
                 android:textStyle="bold" />
         </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/sortId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:backgroundTint="@color/black"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:textColor="@color/white"
+                android:text="Products Sorted By Id"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:textStyle="bold" />
+        </androidx.cardview.widget.CardView>
+
         <!-- Find Product by category -->
         <androidx.cardview.widget.CardView
             android:id="@+id/brandList"
