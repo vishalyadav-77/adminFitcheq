@@ -21,9 +21,9 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:text="Gender: Male" android:textSize="12sp" />
 
-    <TextView android:id="@+id/tagTextView"
+    <TextView android:id="@+id/idTextView"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="Tag: starboy" android:textSize="12sp" />
+        android:text="Id: starboy" android:textSize="12sp" />
     <TextView
         android:id="@+id/tvImageUrlsWarning"
         android:layout_width="wrap_content"

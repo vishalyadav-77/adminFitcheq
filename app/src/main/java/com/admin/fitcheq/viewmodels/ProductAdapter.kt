@@ -32,11 +32,7 @@ class ProductAdapter(
             titleTextView.text = outfit.title
             priceTextView.text = "₹${outfit.price}"
             genderTextView.text = "Gender: ${outfit.gender}"
-            tagTextView.text = if (!outfit.tags.isNullOrEmpty()) {
-                "Tag: ${outfit.tags[0]}"
-            } else {
-                "Tag: None"
-            }
+            idTextView.text = "Id: ${outfit.id}"
 
             if (outfit.imageUrls.isNullOrEmpty()) {
                 tvImageUrlsWarning.visibility = View.VISIBLE
