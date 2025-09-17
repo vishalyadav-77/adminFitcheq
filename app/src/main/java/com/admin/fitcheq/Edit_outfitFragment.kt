@@ -98,24 +98,24 @@ class Edit_outfitFragment : Fragment() {
             val safeDocId = documentId ?: ""
             if (safeDocId.isNotEmpty()) {
                 val updatedOutfit = OutfitData(
-                    title = binding.etTitle.text.toString(),
-                    price = binding.etPrice.text.toString(),
-                    gender = binding.etGender.text.toString(),
-                    imageUrl = binding.etImageUrl.text.toString(),
+                    title = binding.etTitle.text.toString().trim(),
+                    price = binding.etPrice.text.toString().trim(),
+                    gender = binding.etGender.text.toString().trim(),
+                    imageUrl = binding.etImageUrl.text.toString().trim(),
                     imageUrls =binding.etImageUrls.text.toString()
                         .split("\n")
                         .map { it.trim() }
                         .filter { it.isNotEmpty()},
-                    link = binding.etLink.text.toString(),
-                    id = binding.etId.text.toString(),
-                    website = binding.etWebsite.text.toString(),
+                    link = binding.etLink.text.toString().trim(),
+                    id = binding.etId.text.toString().trim(),
+                    website = binding.etWebsite.text.toString().trim(),
                     tags = binding.etTags.text.toString()
                         .split(",")
                         .map { it.trim() }
                         .filter { it.isNotEmpty() },
-                    category = binding.etCategory.text.toString(),
-                    type = binding.etType.text.toString(),
-                    color = binding.etColor.text.toString(),
+                    category = binding.etCategory.text.toString().trim(),
+                    type = binding.etType.text.toString().trim(),
+                    color = binding.etColor.text.toString().trim(),
                     style = binding.etStyle.text.toString().split(",")
                         .map { it.trim() }
                         .filter { it.isNotEmpty()},
@@ -125,8 +125,8 @@ class Edit_outfitFragment : Fragment() {
                     season = binding.etSeason.text.toString().split(",")
                         .map { it.trim() }
                         .filter { it.isNotEmpty()},
-                    fit = binding.etFit.text.toString(),
-                    material = binding.etMaterial.text.toString()
+                    fit = binding.etFit.text.toString().trim(),
+                    material = binding.etMaterial.text.toString().trim()
                 )
 
                 firestore.collection("outfits").document(safeDocId)
