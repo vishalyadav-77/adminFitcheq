@@ -74,37 +74,68 @@ class CleanupActivity : AppCompatActivity() {
                     doc.toObject(OutfitData::class.java)
                 }
 
-                // Prepare master filters map
-                val updated = mutableMapOf<String, MutableSet<String>>(
-                    "brands" to mutableSetOf(),
-                    "categories" to mutableSetOf(),
-                    "type" to mutableSetOf(),
-                    "fits" to mutableSetOf(),
-                    "colors" to mutableSetOf(),
-                    "materials" to mutableSetOf(),
-                    "tags" to mutableSetOf(),
-                    "styles" to mutableSetOf(),
-                    "occasions" to mutableSetOf(),
-                    "seasons" to mutableSetOf()
-                )
+                val genderKeys = listOf("male", "female", "unisex")
+
+                // Initialize filters map
+                val filtersMap = mutableMapOf<String, MutableMap<String, MutableSet<String>>>()
+
+                // Initialize brand map
+                val brandMap = genderKeys.associateWith { mutableSetOf<String>() }.toMutableMap()
 
                 allProducts.forEach { outfit ->
-                    outfit.website?.let { updated["brands"]?.add(it) }
-                    outfit.category?.let { updated["categories"]?.add(it) }
-                    outfit.type?.let { updated["type"]?.add(it) }
-                    outfit.fit?.let { updated["fits"]?.add(it) }
-                    outfit.color?.let { updated["colors"]?.add(it) }
-                    outfit.material?.let { updated["materials"]?.add(it) }
-                    outfit.tags?.forEach { updated["tags"]?.add(it) }
-                    outfit.style?.forEach { updated["styles"]?.add(it) }
-                    outfit.occasion?.forEach { updated["occasions"]?.add(it) }
-                    outfit.season?.forEach { updated["seasons"]?.add(it) }
+                    val gender = outfit.gender?.trim()?.lowercase() ?: return@forEach
+
+                    // --- Brand ---
+                    outfit.website?.takeIf { it.isNotBlank() }?.let { brand ->
+                        if (!brandMap.containsKey(gender)) brandMap[gender] = mutableSetOf()
+                        brandMap[gender]?.add(brand.trim().lowercase())
+                    }
+
+                    // --- Other filters ---
+                    fun addValue(field: String, value: String?) {
+                        if (value.isNullOrBlank()) return
+
+                        // Initialize field map if missing
+                        if (!filtersMap.containsKey(field)) filtersMap[field] = mutableMapOf()
+
+                        val genderMap = filtersMap[field]!!
+
+                        // Initialize gender set if missing
+                        if (!genderMap.containsKey(gender)) genderMap[gender] = mutableSetOf()
+
+                        genderMap[gender]?.add(value.trim().lowercase())
+                    }
+
+                    addValue("categories", outfit.category)
+                    addValue("type", outfit.type)
+                    addValue("fits", outfit.fit)
+                    addValue("colors", outfit.color)
+                    addValue("materials", outfit.material)
+                    outfit.tags?.forEach { addValue("tags", it) }
+                    outfit.style?.forEach { addValue("styles", it) }
+                    outfit.occasion?.forEach { addValue("occasions", it) }
+                    outfit.season?.forEach { addValue("seasons", it) }
                 }
 
-                // Convert sets to lists for Firestore
-                val finalMap = updated.mapValues { it.value.toList() }
+                // Convert sets to lists and skip empty arrays
+                val finalMap = mutableMapOf<String, Any>()
+                filtersMap.forEach { (field, genderMap) ->
+                    val cleanedMap = genderMap
+                        .filterValues { it.isNotEmpty() }
+                        .mapValues { it.value.toList() }
+                    if (cleanedMap.isNotEmpty()) {
+                        finalMap[field] = cleanedMap
+                    }
+                }
 
-                // Update filters/master
+                val cleanedBrandMap = brandMap
+                    .filterValues { it.isNotEmpty() }
+                    .mapValues { it.value.toList() }
+                if (cleanedBrandMap.isNotEmpty()) {
+                    finalMap["brand"] = cleanedBrandMap
+                }
+
+                // Update filters/master in Firestore
                 db.collection("filters").document("master")
                     .set(finalMap, SetOptions.merge())
                     .addOnSuccessListener {
@@ -121,4 +152,5 @@ class CleanupActivity : AppCompatActivity() {
                 cleanupButton.isEnabled = true
             }
     }
+
 }

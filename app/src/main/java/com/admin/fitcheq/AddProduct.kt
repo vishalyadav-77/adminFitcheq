@@ -167,39 +167,60 @@ private fun updateFilters(firestore: FirebaseFirestore, outfit: OutfitData) {
         val updated = mutableMapOf<String, Any>()
         updated.putAll(current)
 
-        // Append unique values for each filter field
-        fun updateList(key: String, value: String?) {
-            if (!value.isNullOrEmpty()) {
-                val existing = (current[key] as? List<*>)?.map { it.toString() } ?: emptyList()
-                if (!existing.contains(value)) {
-                    updated[key] = existing + value
-                }
+        val genderKey = outfit.gender?.trim()?.lowercase() ?: "unisex"
+
+        // --- Update brand map ---
+        outfit.website?.takeIf { it.isNotBlank() }?.let { brand ->
+            val brandMap: MutableMap<String, MutableList<String>> = (current["brand"] as? Map<*, *>)?.mapValues { (_, v) ->
+                ((v as? List<*>)?.map { it.toString() }?.toMutableList() ?: mutableListOf())
+            }?.mapKeys { (k, _) -> k.toString() }?.toMutableMap() ?: mutableMapOf()
+
+            // Initialize gender key if missing
+            if (!brandMap.containsKey(genderKey)) {
+                brandMap[genderKey] = mutableListOf()
             }
+
+            val brandValue = brand.trim().lowercase() // Match sync function behavior
+            if (!brandMap[genderKey]!!.contains(brandValue)) {
+                brandMap[genderKey]!!.add(brandValue)
+            }
+
+            updated["brand"] = brandMap
         }
 
-        // Handle list-based fields
-        fun updateListValues(key: String, values: List<String>) {
-            if (values.isNotEmpty()) {
-                val existing = (current[key] as? List<*>)?.map { it.toString() } ?: emptyList()
-                val newValues = values.filterNot { existing.contains(it) }
-                if (newValues.isNotEmpty()) {
-                    updated[key] = existing + newValues
-                }
+        // --- Update other filters as gender-specific maps ---
+        fun addGenderedValue(field: String, value: String?) {
+            if (value.isNullOrBlank()) return
+
+            val fieldMap: MutableMap<String, MutableList<String>> = (current[field] as? Map<*, *>)?.mapValues { (_, v) ->
+                ((v as? List<*>)?.map { it.toString() }?.toMutableList() ?: mutableListOf())
+            }?.mapKeys { (k, _) -> k.toString() }?.toMutableMap() ?: mutableMapOf()
+
+            // Initialize gender key if missing
+            if (!fieldMap.containsKey(genderKey)) {
+                fieldMap[genderKey] = mutableListOf()
             }
+
+            val cleanValue = value.trim().lowercase()
+            if (!fieldMap[genderKey]!!.contains(cleanValue)) {
+                fieldMap[genderKey]!!.add(cleanValue)
+            }
+
+            updated[field] = fieldMap
         }
 
-        // Update each filter field
-        updateList("brands", outfit.website)
-        updateList("categories", outfit.category)
-        updateList("type", outfit.type)
-        updateList("fits", outfit.fit)
-        updateList("colors", outfit.color)
-        updateList("materials", outfit.material)
-//        updateListValues("tags", outfit.tags)
-//        updateListValues("styles", outfit.style)
-//        updateListValues("occasions", outfit.occasion)
-//        updateListValues("seasons", outfit.season)
+        addGenderedValue("categories", outfit.category)
+        addGenderedValue("type", outfit.type)
+        addGenderedValue("fits", outfit.fit)
+        addGenderedValue("colors", outfit.color)
+        addGenderedValue("materials", outfit.material)
+        outfit.tags?.forEach { addGenderedValue("tags", it) }
+        outfit.style?.forEach { addGenderedValue("styles", it) }
+        outfit.occasion?.forEach { addGenderedValue("occasions", it) }
+        outfit.season?.forEach { addGenderedValue("seasons", it) }
 
         transaction.set(filtersDoc, updated, SetOptions.merge())
     }
 }
+
+
