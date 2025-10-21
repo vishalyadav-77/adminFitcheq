@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.admin.fitcheq.data.OutfitData
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 
@@ -120,14 +121,14 @@ class AddProduct : AppCompatActivity() {
                 .filter { it.isNotEmpty() }
             val seasonList = etSeason.text.toString().split(",").map { it.trim().lowercase().replace(" ", "") }
                 .filter { it.isNotEmpty() }
-            val outfits = OutfitData(
+            val outfit = OutfitData(
                 id = etproductId.text.toString().trim().lowercase().replace(" ", ""),
                 link = eturl.text.toString().trim(),
                 imageUrl = etimageUrl.text.toString(),
                 imageUrls = imageUrlsList,
                 title = ettitle.text.toString().trim(),
                 price = etprice.text.toString().trim().replace(" ", ""),
-                website = etwebsite.text.toString().trim().uppercase(),
+                website = etwebsite.text.toString().trim().lowercase(),
                 gender = etgender.text.toString().trim().lowercase(),
                 tags = tagList,
                 category = etCategory.text.toString().trim().lowercase(),
@@ -140,11 +141,11 @@ class AddProduct : AppCompatActivity() {
                 material = etMaterial.text.toString().trim().lowercase().replace(" ", "")
             )
             // 1. Add new product
-            firestore.collection("outfits").add(outfits)
+            firestore.collection("outfits").add(outfit)
                 .addOnSuccessListener {
                     Toast.makeText(this, "Outfit Added", Toast.LENGTH_SHORT).show()
                     // 2. Update filters collection
-                    updateFilters(firestore, outfits)
+                    updateFilters(firestore, outfit)
                     // 3. Navigate to dashboard
                     val intent = Intent(this, DashBoardActivity::class.java)
                     startActivity(intent)
@@ -157,70 +158,57 @@ class AddProduct : AppCompatActivity() {
 
     }
 }
+
 private fun updateFilters(firestore: FirebaseFirestore, outfit: OutfitData) {
-    val filtersDoc = firestore.collection("filters").document("master")
+    val gender = outfit.gender?.trim()?.lowercase() ?: return
+    val category = outfit.category?.trim()?.lowercase()
+    val styleList = outfit.style?.map { it.trim().lowercase() } ?: emptyList()
+    val seasons = outfit.season ?: emptyList()
+    val occasions = outfit.occasion ?: emptyList()
 
-    firestore.runTransaction { transaction ->
-        val snapshot = transaction.get(filtersDoc)
-        val current = snapshot.data ?: emptyMap<String, Any>()
+    fun addDoc(fieldPrefix: String, valueList: List<String>) {
+        valueList.forEach { value ->
+            if (value.isBlank()) return@forEach
+            val docId = "${fieldPrefix}_${value.trim().lowercase()}_${gender}"
+            val docRef = firestore.collection("filters").document(docId)
 
-        val updated = mutableMapOf<String, Any>()
-        updated.putAll(current)
+            val updates = mutableMapOf<String, Any>()
 
-        val genderKey = outfit.gender?.trim()?.lowercase() ?: "unisex"
-
-        // --- Update brand map ---
-        outfit.website?.takeIf { it.isNotBlank() }?.let { brand ->
-            val brandMap: MutableMap<String, MutableList<String>> = (current["brand"] as? Map<*, *>)?.mapValues { (_, v) ->
-                ((v as? List<*>)?.map { it.toString() }?.toMutableList() ?: mutableListOf())
-            }?.mapKeys { (k, _) -> k.toString() }?.toMutableMap() ?: mutableMapOf()
-
-            // Initialize gender key if missing
-            if (!brandMap.containsKey(genderKey)) {
-                brandMap[genderKey] = mutableListOf()
+            fun addValue(field: String, value: String?) {
+                if (value.isNullOrBlank()) return
+                updates[field] = FieldValue.arrayUnion(value.trim().lowercase())
             }
 
-            val brandValue = brand.trim().lowercase() // Match sync function behavior
-            if (!brandMap[genderKey]!!.contains(brandValue)) {
-                brandMap[genderKey]!!.add(brandValue)
-            }
+            // Common fields
+            addValue("categories", outfit.category)
+            addValue("brand", outfit.website)
+            addValue("fits", outfit.fit)
+            addValue("colors", outfit.color)
+            addValue("materials", outfit.material)
+            addValue("type", outfit.type)
+            outfit.tags?.forEach { tag -> addValue("tags", tag) }
+            outfit.occasion?.forEach { occ -> addValue("occasions", occ) }
+            outfit.season?.forEach { s -> addValue("seasons", s) }
 
-            updated["brand"] = brandMap
+            // Merge into Firestore (no overwrite, just append unique values)
+            if (updates.isNotEmpty()) {
+                docRef.set(updates, SetOptions.merge())
+            }
         }
-
-        // --- Update other filters as gender-specific maps ---
-        fun addGenderedValue(field: String, value: String?) {
-            if (value.isNullOrBlank()) return
-
-            val fieldMap: MutableMap<String, MutableList<String>> = (current[field] as? Map<*, *>)?.mapValues { (_, v) ->
-                ((v as? List<*>)?.map { it.toString() }?.toMutableList() ?: mutableListOf())
-            }?.mapKeys { (k, _) -> k.toString() }?.toMutableMap() ?: mutableMapOf()
-
-            // Initialize gender key if missing
-            if (!fieldMap.containsKey(genderKey)) {
-                fieldMap[genderKey] = mutableListOf()
-            }
-
-            val cleanValue = value.trim().lowercase()
-            if (!fieldMap[genderKey]!!.contains(cleanValue)) {
-                fieldMap[genderKey]!!.add(cleanValue)
-            }
-
-            updated[field] = fieldMap
-        }
-
-        addGenderedValue("categories", outfit.category)
-        addGenderedValue("type", outfit.type)
-        addGenderedValue("fits", outfit.fit)
-        addGenderedValue("colors", outfit.color)
-        addGenderedValue("materials", outfit.material)
-        outfit.tags?.forEach { addGenderedValue("tags", it) }
-        outfit.style?.forEach { addGenderedValue("styles", it) }
-        outfit.occasion?.forEach { addGenderedValue("occasions", it) }
-        outfit.season?.forEach { addGenderedValue("seasons", it) }
-
-        transaction.set(filtersDoc, updated, SetOptions.merge())
     }
+
+    // --- Category docs ---
+    if (!category.isNullOrBlank()) addDoc("category", listOf(category))
+
+    // --- Style docs ---
+    addDoc("style", styleList)
+
+    // --- Season docs ---
+    addDoc("season", seasons)
+
+    // --- Occasion docs ---
+    addDoc("occasion", occasions)
 }
+
 
 
