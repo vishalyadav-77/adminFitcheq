@@ -15,7 +15,9 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import com.admin.fitcheq.data.OutfitData
 import com.admin.fitcheq.databinding.FragmentEditOutfitBinding
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlin.collections.get
 import kotlin.text.get
 
@@ -102,47 +104,63 @@ class Edit_outfitFragment : Fragment() {
                     price = binding.etPrice.text.toString().trim(),
                     gender = binding.etGender.text.toString().trim(),
                     imageUrl = binding.etImageUrl.text.toString().trim(),
-                    imageUrls =binding.etImageUrls.text.toString()
-                        .split("\n")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty()},
+                    imageUrls = binding.etImageUrls.text.toString()
+                        .split("\n").map { it.trim() }.filter { it.isNotEmpty() },
                     link = binding.etLink.text.toString().trim(),
                     id = binding.etId.text.toString().trim(),
                     website = binding.etWebsite.text.toString().trim(),
-                    tags = binding.etTags.text.toString()
-                        .split(",")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty() },
+                    tags = binding.etTags.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() },
                     category = binding.etCategory.text.toString().trim(),
                     type = binding.etType.text.toString().trim(),
                     color = binding.etColor.text.toString().trim(),
-                    style = binding.etStyle.text.toString().split(",")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty()},
-                    occasion = binding.etOccasion.text.toString().split(",")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty()},
-                    season = binding.etSeason.text.toString().split(",")
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty()},
+                    style = binding.etStyle.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() },
+                    occasion = binding.etOccasion.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() },
+                    season = binding.etSeason.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() },
                     fit = binding.etFit.text.toString().trim(),
                     material = binding.etMaterial.text.toString().trim()
                 )
 
-                firestore.collection("outfits").document(safeDocId)
-                    .set(updatedOutfit)
-                    .addOnSuccessListener {
-                        Toast.makeText(view.context, "Outfit updated successfully", Toast.LENGTH_SHORT).show()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                firestore.collection("outfits").document(safeDocId).get()
+                    .addOnSuccessListener { snapshot ->
+                        val oldOutfit = snapshot.toObject(OutfitData::class.java)
 
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(view.context, "Failed to update outfit: ${e.message}", Toast.LENGTH_SHORT).show()
+                        // 🔎 Compare only filter-related fields
+                        val filterFieldsChanged = oldOutfit?.let {
+                            it.category != updatedOutfit.category ||
+                                    it.type != updatedOutfit.type ||
+                                    it.color != updatedOutfit.color ||
+                                    it.gender != updatedOutfit.gender ||
+                                    it.website != updatedOutfit.website ||
+                                    it.fit != updatedOutfit.fit ||
+                                    it.material != updatedOutfit.material ||
+                                    it.tags?.toSet() != updatedOutfit.tags?.toSet() ||
+                                    it.style?.toSet() != updatedOutfit.style?.toSet() ||
+                                    it.occasion?.toSet() != updatedOutfit.occasion?.toSet() ||
+                                    it.season?.toSet() != updatedOutfit.season?.toSet()
+                        } ?: true // if no old outfit, treat as changed
+
+                        // ✅ Update outfit
+                        firestore.collection("outfits").document(safeDocId)
+                            .set(updatedOutfit)
+                            .addOnSuccessListener {
+                                Toast.makeText(view.context, "Outfit updated successfully", Toast.LENGTH_SHORT).show()
+
+                                // Only update filters if something changed
+                                if (filterFieldsChanged) {
+                                    updateFilters(firestore, updatedOutfit)
+                                }
+
+                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(view.context, "Failed to update outfit: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                     }
             } else {
                 Toast.makeText(view.context, "No document selected to update", Toast.LENGTH_SHORT).show()
             }
         }
+
     }
 
     override fun onDestroyView() {
@@ -230,6 +248,57 @@ class Edit_outfitFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
 
+    }
+
+    private fun updateFilters(firestore: FirebaseFirestore, outfit: OutfitData) {
+        val gender = outfit.gender?.trim()?.lowercase() ?: return
+        val category = outfit.category?.trim()?.lowercase()
+        val styleList = outfit.style?.map { it.trim().lowercase() } ?: emptyList()
+        val seasons = outfit.season ?: emptyList()
+        val occasions = outfit.occasion ?: emptyList()
+
+        fun addDoc(fieldPrefix: String, valueList: List<String>) {
+            valueList.forEach { value ->
+                if (value.isBlank()) return@forEach
+                val docId = "${fieldPrefix}_${value.trim().lowercase()}_${gender}"
+                val docRef = firestore.collection("filters").document(docId)
+
+                val updates = mutableMapOf<String, Any>()
+
+                fun addValue(field: String, value: String?) {
+                    if (value.isNullOrBlank()) return
+                    updates[field] = FieldValue.arrayUnion(value.trim().lowercase())
+                }
+
+                // Common fields
+                addValue("categories", outfit.category)
+                addValue("brand", outfit.website)
+                addValue("fits", outfit.fit)
+                addValue("colors", outfit.color)
+                addValue("materials", outfit.material)
+                addValue("type", outfit.type)
+                outfit.tags?.forEach { tag -> addValue("tags", tag) }
+                outfit.occasion?.forEach { occ -> addValue("occasions", occ) }
+                outfit.season?.forEach { s -> addValue("seasons", s) }
+
+                // Merge into Firestore (no overwrite, just append unique values)
+                if (updates.isNotEmpty()) {
+                    docRef.set(updates, SetOptions.merge())
+                }
+            }
+        }
+
+        // --- Category docs ---
+        if (!category.isNullOrBlank()) addDoc("category", listOf(category))
+
+        // --- Style docs ---
+        addDoc("style", styleList)
+
+        // --- Season docs ---
+        addDoc("season", seasons)
+
+        // --- Occasion docs ---
+        addDoc("occasion", occasions)
     }
 
 
