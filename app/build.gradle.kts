@@ -55,6 +55,5 @@ dependencies {
     implementation ("androidx.fragment:fragment-ktx:1.7.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
-
 }
 apply (plugin = "com.google.gms.google-services")
